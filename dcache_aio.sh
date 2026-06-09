@@ -233,15 +233,15 @@ fi
 
 
 # install java and ruby
-log "install java17 and ruby"
-dnf install -y java-17-openjdk-devel.x86_64 ruby
+log "install java21 and ruby"
+dnf install -y java-21-openjdk-devel.x86_64 ruby
 
 
 # Install httpd-tools
 dnf install httpd-tools -y
 
 # Install postgresql
-pg_version=17
+pg_version=18
 if ! rpm -qa | grep --silent postgres ; then
     sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
     sudo dnf -qy module disable postgresql
