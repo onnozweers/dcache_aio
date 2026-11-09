@@ -37,7 +37,7 @@ function show_help {
 # Wrapper logging function
 log() {
     local symbol="❱"
-    echo "$symbol $@"
+    echo "$symbol $*"
 }
 
 # Initializing default values for variables
@@ -141,6 +141,7 @@ if ! grep -q "^LC_ALL=$LC_ALL_LOCALE" /etc/locale.conf; then
 fi
 
 # Apply the changes
+# shellcheck source=/dev/null
 source /etc/locale.conf
 
 PAGE_URL="https://www.dcache.org/downloads/"
@@ -187,7 +188,7 @@ select PACK in "${PACKAGES[@]}"; do
     fi
 done
 dcache_rpm=$SELECTED_PACKAGE_URL
-dcache_basename=$(basename $dcache_rpm)
+dcache_basename=$(basename "$dcache_rpm")
 
 # Download RPM if the file does not yet exist
 if [ -f "$dcache_basename" ]; then
@@ -344,7 +345,7 @@ log "  /etc/dcache/dcache.conf"
 backup_file /etc/dcache/dcache.conf
 echo "dcache.layout=mylayout" > /etc/dcache/dcache.conf
 
-defaultIP=$(ip -4 addr show $(ip -4 route show default | awk '{print $5}') | grep "inet " | awk '{print $2}' |cut -d "/" -f 1
+defaultIP=$(ip -4 addr show "$(ip -4 route show default | awk '{print $5}')" | grep "inet " | awk '{print $2}' |cut -d "/" -f 1
 )
 log "Default IP is: $defaultIP"
 layoutfile="/etc/dcache/layouts/mylayout.conf"
