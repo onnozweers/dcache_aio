@@ -287,6 +287,14 @@ function db_exists {
     su - postgres -c "psql -tAc \"SELECT 1 FROM pg_database WHERE datname='$1'\"" | grep -q 1
 }
 
+# Function to move an existing config file out of the way (numbered backups)
+function backup_file {
+    if [ -e "$1" ]; then
+        log "  Existing $1 found; moving it out of the way."
+        mv --verbose --backup=numbered "$1" "$1.old"
+    fi
+}
+
 # Variables
 PG_USER="dcache"
 PG_DB="chimera pinmanager bulk"
@@ -377,6 +385,7 @@ fi
 
 
 log "  /etc/dcache/gplazma.conf"
+backup_file /etc/dcache/gplazma.conf
 cat <<'EOF' >/etc/dcache/gplazma.conf
 auth     sufficient  htpasswd
 map      sufficient  multimap
@@ -390,6 +399,7 @@ htpasswd -bm /etc/dcache/htpasswd tester "${PASSWD}"
 htpasswd -bm /etc/dcache/htpasswd admin  "${PASSWD}"
 
 log "  /etc/dcache/multi-mapfile"
+backup_file /etc/dcache/multi-mapfile
 cat <<'EOF' > /etc/dcache/multi-mapfile
 username:tester uid:1000 gid:1000,true
 username:admin  uid:0    gid:0,true
@@ -398,18 +408,24 @@ EOF
 touch /etc/dcache/ban.conf
 
 
-log "Generating self-signed host certificate..."
-mkdir -p /etc/grid-security
-touch /etc/grid-security/hostkey.pem
-touch /etc/grid-security/hostcert.pem
 mkdir -p /etc/grid-security/certificates
-openssl genrsa 2048 > /etc/grid-security/hostkey.pem
-openssl req -x509 -days 1000 -new \
-            -subj "/C=NL/ST=Amsterdam/O=SURF/OU=ODS/CN=localhost" \
-            -key /etc/grid-security/hostkey.pem \
-            -out /etc/grid-security/hostcert.pem
+if [ -s /etc/grid-security/hostcert.pem ] && [ -s /etc/grid-security/hostkey.pem ]; then
+    log "Existing host certificate and key found; reusing them."
+else
+    log "Generating self-signed host certificate..."
+    # If only one of the two exists, keep a backup of it.
+    backup_file /etc/grid-security/hostcert.pem
+    backup_file /etc/grid-security/hostkey.pem
+    (umask 077; openssl genrsa -out /etc/grid-security/hostkey.pem 2048)
+    openssl req -x509 -days 1000 -new \
+                -subj "/C=NL/ST=Amsterdam/O=SURF/OU=ODS/CN=localhost" \
+                -key /etc/grid-security/hostkey.pem \
+                -out /etc/grid-security/hostcert.pem
+fi
+chmod 600 /etc/grid-security/hostkey.pem
 
 log "  /etc/grid-security/storage-authzdb"
+backup_file /etc/grid-security/storage-authzdb
 cat <<'EOF' > /etc/grid-security/storage-authzdb
 version 2.1
 
