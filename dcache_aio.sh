@@ -340,12 +340,9 @@ fi
 log "Writing dCache configuration files."
 log "  /etc/dcache/dcache.conf"
 # dCache configuration
-if [ -f /etc/dcache/dcache.conf ]; then
-    # An existing dcache.conf could be dangerous. It might point to a production database elsewhere, causing damage!
-    log "  Existing dcache.conf found; moving it out of the way."
-    mv --verbose --backup=numbered /etc/dcache/dcache.conf /etc/dcache/dcache.conf.old
-    echo "dcache.layout=mylayout" >> /etc/dcache/dcache.conf
-fi
+# An existing dcache.conf could be dangerous. It might point to a production database elsewhere, causing damage!
+backup_file /etc/dcache/dcache.conf
+echo "dcache.layout=mylayout" > /etc/dcache/dcache.conf
 
 defaultIP=$(ip -4 addr show $(ip -4 route show default | awk '{print $5}') | grep "inet " | awk '{print $2}' |cut -d "/" -f 1
 )
