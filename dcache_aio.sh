@@ -4,12 +4,18 @@
 #
 # A script that sets up a nice simple dCache all-in-one server.
 # It creates a self-signed host certificate, but does not use that
-# (it's only needed to start the service).
+# (it's only needed to start the service). If /etc/grid-security already
+# contains hostcert.pem and hostkey.pem, those are reused instead.
+#
+# Existing config files that this script rewrites (dcache.conf,
+# gplazma.conf, multi-mapfile, storage-authzdb) are first moved to
+# <file>.old, with older backups kept as <file>.old.~N~.
 
-# You'll need to specify two values or you will be prompted to give them.
+# You'll need to specify three values or you will be prompted to give them.
 
-# - the data directory (e.g. /home/datadir
+# - the data directory (e.g. /home/datadir)
 # - the password for the test user
+# - the fake tape backend directory (not the same as the data directory)
 
 # Tested on AlmaLinux 9.6
 # minimal 2 cpu and 2GB memory
