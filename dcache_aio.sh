@@ -470,18 +470,13 @@ done
 log "dCache is running"
 
 log "Waiting for admin interface to start"
-count=0
 max_count=60
-false
-while [ "$?" -ne "0" ]; do
-    if nc -z localhost 22224 -w 1
-    then
+for ((count=0; count<max_count; count++)); do
+    if nc -z localhost 22224 -w 1; then
         log "Admin interface ready."
         break
-    else
-        sleep 1
-       ((count++))
     fi
+    sleep 1
 done
 
 if [ $count -eq $max_count ]; then
