@@ -15,7 +15,7 @@ Features:
 - Installs PostgreSQL and dCache.
 - Configures PostgreSQL for dCache.
 - Sets up firewall rules.
-- Generates a self-signed certificate.
+- Generates a self-signed host certificate, unless `/etc/grid-security/hostcert.pem` and `hostkey.pem` already exist; an existing pair is reused.
 - Sets up a webdav door with https
 - Sets up a frontend/api door with https
 - Supports interactive mode for input if parameters aren't provided.
@@ -28,6 +28,10 @@ You'll need to specify three values or you will be prompted to give them.
 
 Tested on AlmaLinux 9.6<br>
 minimal 2 cpu and 2GB memory
+
+Existing configuration files that the script rewrites (`dcache.conf`, `gplazma.conf`,
+`multi-mapfile` and `storage-authzdb`) are first moved out of the way to `<file>.old`.
+Older backups are kept as `<file>.old.~1~`, `<file>.old.~2~`, etc.
 
 ❢ DON'T RUN THIS ON A PRODUCTION SERVER!<br>
 ❢ Use on a test system only, at your own risk!
