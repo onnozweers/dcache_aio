@@ -426,7 +426,9 @@ else
                 -key /etc/grid-security/hostkey.pem \
                 -out /etc/grid-security/hostcert.pem
 fi
-chmod 600 /etc/grid-security/hostkey.pem
+# dCache runs as user dcache (created by the RPM), so give group dcache read access.
+chown root:dcache /etc/grid-security/hostkey.pem
+chmod 640 /etc/grid-security/hostkey.pem
 
 log "  /etc/grid-security/storage-authzdb"
 backup_file /etc/grid-security/storage-authzdb
