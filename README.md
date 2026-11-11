@@ -29,9 +29,10 @@ You'll need to specify three values or you will be prompted to give them.
 Tested on AlmaLinux 9.6<br>
 minimal 2 cpu and 2GB memory
 
-Existing configuration files that the script rewrites (`dcache.conf`, `gplazma.conf`,
-`multi-mapfile` and `storage-authzdb`) are first moved out of the way to `<file>.old`.
-Older backups are kept as `<file>.old.~1~`, `<file>.old.~2~`, etc.
+An existing `/etc/dcache` directory is moved as a whole to `/etc/dcache.old`, so config
+files that belong together stay together. Older backups are kept as `/etc/dcache.old.~1~`,
+`/etc/dcache.old.~2~`, etc. An existing `/etc/grid-security/storage-authzdb` is backed up
+the same way.
 
 ❢ DON'T RUN THIS ON A PRODUCTION SERVER!<br>
 ❢ Use on a test system only, at your own risk!

@@ -7,9 +7,10 @@
 # (it's only needed to start the service). If /etc/grid-security already
 # contains hostcert.pem and hostkey.pem, those are reused instead.
 #
-# Existing config files that this script rewrites (dcache.conf,
-# gplazma.conf, multi-mapfile, storage-authzdb) are first moved to
-# <file>.old, with older backups kept as <file>.old.~N~.
+# An existing /etc/dcache directory is moved as a whole to /etc/dcache.old,
+# so config files that belong together stay together. Older backups are
+# kept as /etc/dcache.old.~N~. An existing /etc/grid-security/storage-authzdb
+# is backed up the same way.
 
 # You'll need to specify three values or you will be prompted to give them.
 
@@ -44,6 +45,16 @@ function show_help {
 log() {
     local symbol="❱"
     echo "$symbol $*"
+}
+
+# Move an existing file or directory out of the way to <path>.old.
+# A previous <path>.old is kept as <path>.old.~N~.
+# --no-target-directory makes sure a directory is renamed instead of moved into an existing <path>.old.
+function backup_file {
+    if [ -e "$1" ]; then
+        log "  Existing $1 found; moving it out of the way."
+        mv --verbose --no-target-directory --backup=numbered "$1" "$1.old"
+    fi
 }
 
 # Initializing default values for variables
@@ -275,8 +286,18 @@ cat /var/lib/pgsql/${pg_version}/data/pg_hba.conf | grep -E 'all\s+all' | sed -i
 
 sudo systemctl restart "postgresql-${pg_version}"
 
+# Move an existing dCache configuration out of the way as a whole.
+# An existing dcache.conf could be dangerous. It might point to a production database elsewhere, causing damage!
+backup_file /etc/dcache
+
 # Install the dcache rpm
 dnf install "./${dcache_basename}" -y
+# If this dCache version was already installed, dnf didn't touch it,
+# so /etc/dcache is still missing. Reinstall to get the default files back.
+if [ ! -d /etc/dcache ]; then
+    log "Reinstalling dCache to restore the default /etc/dcache"
+    dnf reinstall "./${dcache_basename}" -y
+fi
 
 # Postgres configuration
 #su - postgres -c "createuser --no-superuser --no-createrole --createdb --no-password dcache"
@@ -292,14 +313,6 @@ function user_exists {
 # Function to check if a PostgreSQL database exists
 function db_exists {
     su - postgres -c "psql -tAc \"SELECT 1 FROM pg_database WHERE datname='$1'\"" | grep -q 1
-}
-
-# Function to move an existing config file out of the way (numbered backups)
-function backup_file {
-    if [ -e "$1" ]; then
-        log "  Existing $1 found; moving it out of the way."
-        mv --verbose --backup=numbered "$1" "$1.old"
-    fi
 }
 
 # Variables
@@ -340,15 +353,14 @@ if [ -f "$sshkey" ]; then
 else
     log "generate sshkey for root"
     ssh-keygen -t ed25519 -N "" -f $sshkey -q
-    log "add root ssh publickey: $sshkey to admin interface authorized_keys"
-    cat "${sshkey}.pub" |sed 's/root@/admin@/' >> /etc/dcache/admin/authorized_keys2
 fi
+# /etc/dcache is new, so always add the key, also when it already existed.
+log "add root ssh publickey: $sshkey to admin interface authorized_keys"
+mkdir -p /etc/dcache/admin
+sed 's/root@/admin@/' "${sshkey}.pub" >> /etc/dcache/admin/authorized_keys2
 
 log "Writing dCache configuration files."
 log "  /etc/dcache/dcache.conf"
-# dCache configuration
-# An existing dcache.conf could be dangerous. It might point to a production database elsewhere, causing damage!
-backup_file /etc/dcache/dcache.conf
 echo "dcache.layout=mylayout" > /etc/dcache/dcache.conf
 
 defaultIP=$(ip -4 addr show "$(ip -4 route show default | awk '{print $5}')" | grep "inet " | awk '{print $2}' |cut -d "/" -f 1
@@ -389,7 +401,6 @@ fi
 
 
 log "  /etc/dcache/gplazma.conf"
-backup_file /etc/dcache/gplazma.conf
 cat <<'EOF' >/etc/dcache/gplazma.conf
 auth     sufficient  htpasswd
 map      sufficient  multimap
@@ -403,7 +414,6 @@ htpasswd -bm /etc/dcache/htpasswd tester "${PASSWD}"
 htpasswd -bm /etc/dcache/htpasswd admin  "${PASSWD}"
 
 log "  /etc/dcache/multi-mapfile"
-backup_file /etc/dcache/multi-mapfile
 cat <<'EOF' > /etc/dcache/multi-mapfile
 username:tester uid:1000 gid:1000,true
 username:admin  uid:0    gid:0,true
