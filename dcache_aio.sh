@@ -103,7 +103,7 @@ done
 while [ -z "$HSMBASE" ] || [ ! -d "$HSMBASE" ] || [ "$HSMBASE" == "$DATADIR" ] ; do
   read -r -p "Enter HSMBASE (must be an existing directory, not the same as DATADIR): " HSMBASE
   if [ -z "$HSMBASE" ]; then
-    echo "DATADIR cannot be empty."
+    echo "HSMBASE cannot be empty."
   elif [ ! -d "$HSMBASE" ]; then
     echo "Directory '$HSMBASE' does not exist."
   elif [ "$HSMBASE" == "$DATADIR" ]; then
