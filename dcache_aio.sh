@@ -269,7 +269,8 @@ sudo systemctl enable "postgresql-${pg_version}"
 sudo systemctl start  "postgresql-${pg_version}"
 
 # Modify pg_hba.conf
-cat /var/lib/pgsql/${pg_version}/data/pg_hba.conf | grep -E 'all\s+all' | sed -i 's/scram-sha-256/trust/' /var/lib/pgsql/${pg_version}/data/pg_hba.conf
+# Only the 'all all' lines; leave the replication lines alone
+sed -i -E '/all\s+all/s/scram-sha-256/trust/' "/var/lib/pgsql/${pg_version}/data/pg_hba.conf"
 
 sudo systemctl restart "postgresql-${pg_version}"
 
