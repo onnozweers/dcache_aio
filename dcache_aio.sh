@@ -93,14 +93,23 @@ if [ -z "$DATADIR" ] || [ -z "$PASSWD" ]; then
     esac
 fi
 
-# Prompt for DATADIR until it's not empty and exists
-while [ -z "$DATADIR" ] || [ ! -d "$DATADIR" ] ; do
-  read -r -p "Enter DATADIR (must be an existing directory): " DATADIR
+# Prompt for DATADIR until it's not empty and exists (offer to create it)
+while true; do
   if [ -z "$DATADIR" ]; then
-    echo "DATADIR cannot be empty."
-  elif [ ! -d "$DATADIR" ]; then
-    echo "Directory '$DATADIR' does not exist."
+    read -r -p "Enter DATADIR (a directory): " DATADIR
+    [ -z "$DATADIR" ] && echo "DATADIR cannot be empty." && continue
   fi
+  if [ -d "$DATADIR" ]; then
+    break
+  elif [ -e "$DATADIR" ]; then
+    echo "'$DATADIR' exists but is not a directory."
+  else
+    read -r -p "Directory '$DATADIR' does not exist. Create it? (y/n) " answer
+    case $answer in
+      [Yy]* ) mkdir -p "$DATADIR" && break ;;
+    esac
+  fi
+  DATADIR=""
 done
 
 # The fake tape backend is optional. It's set up when --hsmbase is given,

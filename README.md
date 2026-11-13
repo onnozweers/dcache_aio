@@ -22,7 +22,7 @@ Features:
 
 You'll need to specify two values or you will be prompted to give them.
 
-- the data directory: dCache will store its data here.
+- the data directory: dCache will store its data here. If it doesn't exist yet, the script offers to create it.
 - the password for the test user. Username is already set to "tester".
 
 Optionally, you can specify a location for the fake tape backend (`--hsmbase`): files which are set to be transfered to tape by the hsm script will be stored here. If the directory doesn't exist yet, the script offers to create it. Without it, no tape backend is set up. In interactive mode, the script asks whether you want one.
