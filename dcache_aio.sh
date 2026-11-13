@@ -132,13 +132,18 @@ LANG_LOCALE="C.UTF-8"
 LC_ALL_LOCALE="C.UTF-8"
 log "Set correct locales for postgres dbinit"
 
-if ! grep -q "^LANG=$LANG_LOCALE" /etc/locale.conf; then
-    echo "LANG is already set to $LANG_LOCALE"
-fi
-
-if ! grep -q "^LC_ALL=$LC_ALL_LOCALE" /etc/locale.conf; then
-    echo "LC_ALL is already set to $LC_ALL_LOCALE"
-fi
+touch /etc/locale.conf
+for setting in "LANG=$LANG_LOCALE" "LC_ALL=$LC_ALL_LOCALE"; do
+    var="${setting%%=*}"
+    value="${setting#*=}"
+    if grep -q -E "^${var}=\"?${value}\"?$" /etc/locale.conf; then
+        log "$var is already set to $value"
+    else
+        log "Setting $var to $value in /etc/locale.conf"
+        sed -i "/^${var}=/d" /etc/locale.conf
+        echo "${var}=${value}" >> /etc/locale.conf
+    fi
+done
 
 # Apply the changes
 source /etc/locale.conf
