@@ -113,7 +113,7 @@ done
 
 # Prompt for PASSWD until it's not empty
 while [ -z "$PASSWD" ]; do
-  read -rp "Enter PASSWD (cannot be empty): " PASSWD
+  read -rsp "Enter PASSWD (cannot be empty): " PASSWD
   echo  # for newline
   if [ -z "$PASSWD" ]; then
     echo "PASSWD cannot be empty."
