@@ -51,15 +51,12 @@ do
     case $arg in
         --datadir=*)
         DATADIR="${arg#*=}"
-        shift
         ;;
         --hsmbase=*)
         HSMBASE="${arg#*=}"
-        shift
         ;;
         --passwd=*)
         PASSWD="${arg#*=}"
-        shift
         ;;
         --help|-h)
         show_help
