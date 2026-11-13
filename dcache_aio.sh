@@ -541,7 +541,7 @@ dcache-admin PoolManager "psu create link tape-link any-protocol tape-ugroup wor
 dcache-admin PoolManager "psu set link tape-link -readpref=10 -writepref=10 -cachepref=10 -p2ppref=-1"
 dcache-admin PoolManager "psu addto link tape-link tape-pools"
 # dCache versions 9 and older need this setting
-dcache-admin PoolManager "pm set -stage-allowed=yes'"
+dcache-admin PoolManager "pm set -stage-allowed=yes"
 # In the PoolManager, we don't need to save changes: they are saved into Zookeeper.
 
 #echo "Next step: write some PoolManager configuration."
