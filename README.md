@@ -26,7 +26,7 @@ You'll need to specify three values or you will be prompted to give them.
 - the password for the test user. Username is already set to "tester".
 - location for the fake tape backend: Files which are set to be transfered to tape by the hsm script will be stored here.
 
-Tested on AlmaLinux 9.6<br>
+Tested on AlmaLinux 9.6 and 10<br>
 minimal 2 cpu and 2GB memory
 
 An existing `/etc/dcache` directory is moved as a whole to `/etc/dcache.old`, so config

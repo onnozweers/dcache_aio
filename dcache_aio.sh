@@ -18,7 +18,7 @@
 # - the password for the test user
 # - the fake tape backend directory (not the same as the data directory)
 
-# Tested on AlmaLinux 9.6
+# Tested on AlmaLinux 9.6 and 10
 # minimal 2 cpu and 2GB memory
 
 # Use on a test system only, at your own risk!
@@ -89,6 +89,19 @@ do
         ;;
     esac
 done
+
+# Check that we're running on EL9 or EL10 (e.g. AlmaLinux)
+# shellcheck source=/dev/null
+el_version=$(. /etc/os-release && echo "${VERSION_ID%%.*}")
+case "$el_version" in
+    9|10)
+        log "Detected EL${el_version}"
+        ;;
+    *)
+        log "Unsupported OS version '${el_version}'. Only EL9 and EL10 (e.g. AlmaLinux 9 or 10) are supported."
+        exit 1
+        ;;
+esac
 
 # If no arguments were provided or if DATADIR or PASSWD are still empty, display help and prompt
 if [ -z "$DATADIR" ] || [ -z "$PASSWD" ]; then
@@ -273,8 +286,11 @@ dnf install netcat -y
 # Install postgresql
 pg_version=17
 if ! rpm -qa | grep --silent postgres ; then
-    sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-    sudo dnf -qy module disable postgresql
+    sudo dnf install -y "https://download.postgresql.org/pub/repos/yum/reporpms/EL-${el_version}-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
+    # EL10 no longer has dnf modules
+    if [ "$el_version" = "9" ]; then
+        sudo dnf -qy module disable postgresql
+    fi
     sudo dnf install -y "postgresql${pg_version}-server"
 fi
 sudo "/usr/pgsql-${pg_version}/bin/postgresql-${pg_version}-setup" initdb
