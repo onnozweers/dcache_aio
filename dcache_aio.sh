@@ -375,9 +375,13 @@ cat <<EOF >$layoutfile
 dcache.enable.space-reservation = false
 dcache.log.destination=file
 
+# Zookeeper gets its own domain, listed first, so that it is
+# started before all other services.
+[zookeeperDomain]
+[zookeeperDomain/zookeeper]
+
 [dCacheDomain]
 dcache.broker.scheme = core
-[dCacheDomain/zookeeper]
 [dCacheDomain/admin]
 [dCacheDomain/pnfsmanager]
  pnfsmanager.default-retention-policy = REPLICA
